@@ -1583,7 +1583,7 @@
     </div>
     <div class="about-card">
       <div class="about-avatar-wrap">
-        <img src="assets/about-muhib-v2.jpg" class="about-photo" alt="Muhib" />
+        <img src="assets/about-muhib.jpg" class="about-photo" alt="Muhib" />
       </div>
       <p class="about-card-name">Muhib</p>
       <p class="about-card-title">Founder · BuiltByMuhib</p>
@@ -1665,22 +1665,22 @@
       Have a question about coaching or not sure where to start? Send a message and Muhib will get back to you personally.
     </p>
 
-    <form class="contact-form" onsubmit="handleSubmit(event)">
+    <form class="contact-form" action="https://formspree.io/f/xlgvjgzo" method="POST" onsubmit="handleSubmit(event)">
       <div class="form-field">
         <label for="fname">First Name</label>
-        <input type="text" id="fname" placeholder="John" required />
+        <input type="text" id="fname" name="first_name" placeholder="John" required />
       </div>
       <div class="form-field">
         <label for="lname">Last Name</label>
-        <input type="text" id="lname" placeholder="Smith" required />
+        <input type="text" id="lname" name="last_name" placeholder="Smith" required />
       </div>
       <div class="form-field full">
         <label for="email">Email Address</label>
-        <input type="email" id="email" placeholder="john@email.com" required />
+        <input type="email" id="email" name="email" placeholder="john@email.com" required />
       </div>
       <div class="form-field full">
         <label for="interest">I'm Interested In</label>
-        <select id="interest">
+        <select id="interest" name="interest">
           <option value="">Select a coaching service...</option>
           <option>Starter Plan</option>
           <option>Growth Plan</option>
@@ -1692,7 +1692,7 @@
       </div>
       <div class="form-field full">
         <label for="message">Message</label>
-        <textarea id="message" placeholder="Tell me about your goals or any questions you have..."></textarea>
+        <textarea id="message" name="message" placeholder="Tell me about your goals or any questions you have..."></textarea>
       </div>
       <div class="form-submit">
         <button type="submit">Send Message →</button>
@@ -1832,10 +1832,40 @@
 
   function handleSubmit(e) {
     e.preventDefault();
+    const form = e.target;
     const msg = document.getElementById('success-msg');
-    msg.style.display = 'block';
-    e.target.querySelectorAll('input, textarea, select, button').forEach(el => el.disabled = true);
-    setTimeout(() => msg.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+    const button = form.querySelector('button');
+    const formData = new FormData(form);
+
+    msg.style.display = 'none';
+    msg.textContent = '';
+    if (button) {
+      button.disabled = true;
+      button.textContent = 'Sending...';
+    }
+
+    fetch(form.action, {
+      method: 'POST',
+      body: formData,
+      headers: { 'Accept': 'application/json' }
+    })
+      .then(response => {
+        if (!response.ok) throw new Error('Form submission failed');
+        msg.textContent = '✓  Thanks! Muhib will be in touch with you soon.';
+        msg.style.display = 'block';
+        form.reset();
+        setTimeout(() => msg.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+      })
+      .catch(() => {
+        msg.textContent = 'Something went wrong. Please try again or message Muhib directly on Instagram.';
+        msg.style.display = 'block';
+      })
+      .finally(() => {
+        if (button) {
+          button.disabled = false;
+          button.textContent = 'Send Message →';
+        }
+      });
   }
 
   const siteNav = document.querySelector('nav');
